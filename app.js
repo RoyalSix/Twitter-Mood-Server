@@ -22,7 +22,7 @@ var _ = require('lodash');
 var bayes = require('bayes');
 var classifier = bayes();
 var fs = require('fs-extra');
-var followersData = [];
+this.followersData = [];
 
 const calculateHappiness = (dataArray) => {
   var totalPos = 0;
@@ -47,14 +47,14 @@ const calculateHappiness = (dataArray) => {
 
 try {
   var bayesData = fs.readJsonSync('./bayesData.json');
-  followersData = fs.readJsonSync('./followersData.json');
+  this.followersData = fs.readJsonSync('./followersData.json');
 } catch (e) {
 }
 if (bayesData) {
   classifier = bayes.fromJson(bayesData);
 }
-if (followersData) {
-  calculateHappiness(followersData);
+if (this.followersData) {
+  calculateHappiness(this.followersData);
 }
 
 nconf.file({ file: 'config.json' }).env();
@@ -89,41 +89,10 @@ tweetStream.on('tweet', (tweet) => {
   const tweetText = tweet.extended_tweet ? tweet.extended_tweet.full_text : tweet.retweeted_status ? tweet.retweeted_status.text : tweet.text;
   if (new RegExp(testRegex).test(tweetText)) {
     tweet.text = tweetText.replace(/(http.+(\S|\b|\n))/g, '').trim();
-    //if (tweet.user.time_zone) tweet.time_zone = tweet.time_zone.replace(/(\r\n|\n|\r)/gm, "");
+    //if (tweet.user.time_zone) tweet.user.time_zone = tweet.user.time_zone.replace(/(\r\n|\n|\r)/gm, "");
     if (this.tweetsArray.length <= 10) this.tweetsArray.push(tweet);
   }
 });
-
-const trainData = () => {
-  this.done = false;
-  if (this.tweetsArray) {
-    const tweet = this.tweetsArray[0];
-    var tweetText = tweet.extended_tweet ? tweet.extended_tweet.full_text : tweet.retweeted_status ? tweet.retweeted_status.text : tweet.text;
-    tweetText = tweetText.replace(/(http.+(\S|\b|\n))/g, '').trim();
-    console.log('\n');
-    console.log('tweet: ', tweetText);
-    console.log('\n');
-    console.log("Attempted categorization: ", classifier.categorize(tweetText))
-    prompt('Enter p for positive, n for negative or press enter to skip ', (input) => {
-      if (input == "p") classifier.learn(tweetText, 'positive');
-      else if (input == "n") classifier.learn(tweetText, 'negative');
-      var stateJson = classifier.toJson();
-      input = input || "neu";
-      if (input != "neu") followersData[input].push({ followers: tweet.user.followers_count, username: tweet.user.screen_name })
-      try {
-        fs.writeJSONSync('./bayesData.json', stateJson)
-        fs.writeJSONSync('./followersData.json', followersData)
-      } catch (e) {
-        console.log(e);
-      }
-      this.done = true;
-      if (this.tweetsArray.length > 0) {
-        this.tweetsArray.shift();
-        trainData();
-      }
-    });
-  }
-}
 
 function categorize(tweet) {
   return classifier.categorize(tweet);
@@ -155,23 +124,20 @@ app.get('/categorize', (req, res) => {
 })
 
 app.post('/train', (req, res) => {
+  var tweetString = req.body.tweet;
+  const category = req.body.category;
+  var tweetObject = JSON.parse(tweetString);
+  if (!tweetObject || !category || !tweetObject.text) return res.sendStatus(400);
+  if (category == "p") classifier.learn(tweetObject.text, 'positive');
+  else if (category == "n") classifier.learn(tweetObject.text, 'negative');
+  var stateJson = classifier.toJson();
+  this.followersData[category].push({ followers: tweetObject.user.followers_count, username: tweetObject.user.screen_name })
   try {
-    console.log(req.body)
+    fs.writeJSONSync('./bayesData.json', stateJson)
+    fs.writeJSONSync('./followersData.json', this.followersData)
   } catch (e) {
-    throw e;
+    res.sendStatus(400);
   }
-  // const category = req.body.category;
-  //if (!tweet || !category || !tweet.text) return res.sendStatus(400);
-  // if (category == "p") classifier.learn(tweet.text, 'positive');
-  // else if (category == "n") classifier.learn(tweet.text, 'negative');
-  // var stateJson = classifier.toJson();
-  // followersData[input].push({ followers: tweet.user.followers_count, username: tweet.user.screen_name })
-  // try {
-  //   fs.writeJSONSync('./bayesData.json', stateJson)
-  //   fs.writeJSONSync('./followersData.json', followersData)
-  // } catch (e) {
-  //   res.sendStatus(400);
-  // }
   res.sendStatus(200);
 })
 
