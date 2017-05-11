@@ -4,25 +4,6 @@ const app = express();
 
 var db = require('./db')
 
-app.get('/',function(req,res){
-    res.sendFile('home.html', { root: __dirname });
-})
-
-db.connect(db.MODE_PRODUCTION, function(err) {
-  if (err) {
-    console.log('Unable to connect to MySQL.')
-    process.exit(1)
-  } else {
-    app.listen(8080, function() {
-      console.log('Listening on port 3000...')
-    })
-  }
-})
-
-app.get('/tweet', function(req, res){
-  res.send('<p>Worked</p>');
-})
-
 
 var nconf = require('nconf');
 var Twit = require('twit');
@@ -92,6 +73,23 @@ var tweetStream = twitter.stream('statuses/filter', { track: ['I'], language: 'e
 this.tweetsArray = [];
 this.done = true;
 
+
+tweetStream.on('tweet', (tweet) => {
+  const tweetText = tweet.extended_tweet ? tweet.extended_tweet.full_text : tweet.retweeted_status ? tweet.retweeted_status.text : tweet.text;
+  if (new RegExp(testRegex).test(tweetText)) {
+    if (this.tweetsArray.length <= 10) this.tweetsArray.push(tweet.text);
+  }
+});
+// prompt('Enter any key to start tweet training', (input) => {
+//   tweetStream.on('tweet', (tweet) => {
+//     const tweetText = tweet.extended_tweet ? tweet.extended_tweet.full_text : tweet.retweeted_status ? tweet.retweeted_status.text : tweet.text;
+//     if (new RegExp(testRegex).test(tweetText)) {
+//       if (this.done && this.tweetsArray.length > 0) trainData();
+//       else this.tweetsArray.push(tweet);
+//     }
+//   });
+// });
+
 const trainData = () => {
   this.done = false;
   if (this.tweetsArray) {
@@ -122,12 +120,23 @@ const trainData = () => {
     });
   }
 }
-prompt('Enter any key to start tweet training', (input) => {
-  tweetStream.on('tweet', (tweet) => {
-    const tweetText = tweet.extended_tweet ? tweet.extended_tweet.full_text : tweet.retweeted_status ? tweet.retweeted_status.text : tweet.text;
-    if (new RegExp(testRegex).test(tweetText)) {
-      if (this.done && this.tweetsArray.length > 0) trainData();
-      else this.tweetsArray.push(tweet);
-    }
-  });
-});
+
+app.get('/', function (req, res) {
+  res.sendFile('home.html', { root: __dirname });
+})
+
+db.connect(db.MODE_PRODUCTION, function (err) {
+  if (err) {
+    console.log('Unable to connect to MySQL.')
+    process.exit(1)
+  } else {
+    app.listen(8080, function () {
+      console.log('Listening on port 3000...')
+    })
+  }
+})
+
+app.get('/tweet', (req, res) => {
+  res.json(this.tweetsArray[0]);
+  this.tweetsArray.shift();
+})
