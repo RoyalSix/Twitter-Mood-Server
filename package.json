@@ -10,13 +10,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "ajax-request": "^1.2.1",
     "async": "^2.4.0",
     "babel-register": "^6.24.1",
-    "express": "^4.15.2",
-    "ajax-request": "^1.2.1",
     "bayes": "0.0.6",
+    "express": "^4.15.2",
     "fs-extra": "^3.0.0",
     "lodash": "^3.3.1",
+    "mysql": "^2.13.0",
     "nconf": "^0.7.1",
     "twit": "^1.1.20"
   }
