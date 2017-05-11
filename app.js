@@ -1,6 +1,11 @@
 require('babel-register');
 var express = require('express');
 const app = express();
+var bodyParser = require('body-parser')
+app.use( bodyParser.json() );       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+  extended: true
+}));
 
 var db = require('./db')
 
@@ -77,7 +82,7 @@ this.done = true;
 tweetStream.on('tweet', (tweet) => {
   const tweetText = tweet.extended_tweet ? tweet.extended_tweet.full_text : tweet.retweeted_status ? tweet.retweeted_status.text : tweet.text;
   if (new RegExp(testRegex).test(tweetText)) {
-    if (this.tweetsArray.length <= 10) this.tweetsArray.push(tweet.text);
+    if (this.tweetsArray.length <= 10) this.tweetsArray.push(tweet);
   }
 });
 
@@ -112,7 +117,7 @@ const trainData = () => {
   }
 }
 
-function categorize (tweet) {
+function categorize(tweet) {
   return classifier.categorize(tweet);
 }
 app.get('/', function (req, res) {
@@ -139,5 +144,24 @@ app.get('/categorize', (req, res) => {
   if (!req.query.tweet) return res.sendStatus(400);
   const tweet = req.query.tweet;
   res.json(categorize(tweet));
+})
+
+app.post('/train', (req, res) => {
+      var name = req.body.tweet;
+        res.send(name)
+  // if (!req.query.tweet || !req.query.category || !re.query.tweet.text) return res.sendStatus(400);
+  // const tweet = req.query.tweet;
+  // const category = req.query.category;
+  // if (category == "p") classifier.learn(tweet.text, 'positive');
+  // else if (category == "n") classifier.learn(tweet.text, 'negative');
+  // var stateJson = classifier.toJson();
+  // followersData[input].push({ followers: tweet.user.followers_count, username: tweet.user.screen_name })
+  // try {
+  //   fs.writeJSONSync('./bayesData.json', stateJson)
+  //   fs.writeJSONSync('./followersData.json', followersData)
+  // } catch (e) {
+  //   res.sendStatus(400);
+  // }
+  // res.sendStatus(200);
 })
 
