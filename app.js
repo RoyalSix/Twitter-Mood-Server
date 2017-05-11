@@ -23,6 +23,7 @@ var bayes = require('bayes');
 var classifier = bayes();
 var fs = require('fs-extra');
 this.followersData = [];
+var request = require('request');
 
 const calculateHappiness = (dataArray) => {
   var totalPos = 0;
@@ -89,8 +90,13 @@ tweetStream.on('tweet', (tweet) => {
   const tweetText = tweet.extended_tweet ? tweet.extended_tweet.full_text : tweet.retweeted_status ? tweet.retweeted_status.text : tweet.text;
   if (new RegExp(testRegex).test(tweetText)) {
     tweet.text = tweetText.replace(/(http.+(\S|\b|\n))/g, '').trim();
-    //if (tweet.user.time_zone) tweet.user.time_zone = tweet.user.time_zone.replace(/(\r\n|\n|\r)/gm, "");
-    if (this.tweetsArray.length <= 10) this.tweetsArray.push(tweet);
+    if (this.tweetsArray.length <= 10) {
+      request(`http://www.purgomalum.com/service/json?text=${encodeURIComponent(tweet.text)}`, (error, response, body) => {
+        var newText = JSON.parse(body).result;
+        tweet.safeText = decodeURIComponent(newText);
+        this.tweetsArray.push(tweet);
+      });
+    }
   }
 });
 
