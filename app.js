@@ -80,15 +80,6 @@ tweetStream.on('tweet', (tweet) => {
     if (this.tweetsArray.length <= 10) this.tweetsArray.push(tweet.text);
   }
 });
-// prompt('Enter any key to start tweet training', (input) => {
-//   tweetStream.on('tweet', (tweet) => {
-//     const tweetText = tweet.extended_tweet ? tweet.extended_tweet.full_text : tweet.retweeted_status ? tweet.retweeted_status.text : tweet.text;
-//     if (new RegExp(testRegex).test(tweetText)) {
-//       if (this.done && this.tweetsArray.length > 0) trainData();
-//       else this.tweetsArray.push(tweet);
-//     }
-//   });
-// });
 
 const trainData = () => {
   this.done = false;
@@ -121,6 +112,9 @@ const trainData = () => {
   }
 }
 
+function categorize (tweet) {
+  return classifier.categorize(tweet);
+}
 app.get('/', function (req, res) {
   res.sendFile('home.html', { root: __dirname });
 })
@@ -140,3 +134,10 @@ app.get('/tweet', (req, res) => {
   res.json(this.tweetsArray[0]);
   this.tweetsArray.shift();
 })
+
+app.get('/categorize', (req, res) => {
+  if (!req.query.tweet) return res.sendStatus(400);
+  const tweet = req.query.tweet;
+  res.json(categorize(tweet));
+})
+
