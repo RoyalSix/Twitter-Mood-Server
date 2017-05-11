@@ -4,12 +4,20 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "async": "^2.4.0",
-    "express": "^4.15.2"
+    "babel-register": "^6.24.1",
+    "express": "^4.15.2",
+    "ajax-request": "^1.2.1",
+    "bayes": "0.0.6",
+    "fs-extra": "^3.0.0",
+    "lodash": "^3.3.1",
+    "nconf": "^0.7.1",
+    "twit": "^1.1.20"
   }
 }
