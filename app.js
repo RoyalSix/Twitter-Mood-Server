@@ -2,14 +2,15 @@ require('babel-register');
 var express = require('express');
 const app = express();
 var bodyParser = require('body-parser')
-app.use( bodyParser.json() );       // to support JSON-encoded bodies
-app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
-  extended: true
-}));
-app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+
+// parse application/json
+app.use(bodyParser.json())
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
 });
 
 var db = require('./db')
@@ -87,6 +88,8 @@ this.done = true;
 tweetStream.on('tweet', (tweet) => {
   const tweetText = tweet.extended_tweet ? tweet.extended_tweet.full_text : tweet.retweeted_status ? tweet.retweeted_status.text : tweet.text;
   if (new RegExp(testRegex).test(tweetText)) {
+    tweet.text = tweetText.replace(/(http.+(\S|\b|\n))/g, '').trim();
+    //if (tweet.user.time_zone) tweet.time_zone = tweet.time_zone.replace(/(\r\n|\n|\r)/gm, "");
     if (this.tweetsArray.length <= 10) this.tweetsArray.push(tweet);
   }
 });
@@ -152,11 +155,13 @@ app.get('/categorize', (req, res) => {
 })
 
 app.post('/train', (req, res) => {
-      var name = req.body.tweet;
-        res.send(name)
-  // if (!req.query.tweet || !req.query.category || !re.query.tweet.text) return res.sendStatus(400);
-  // const tweet = req.query.tweet;
-  // const category = req.query.category;
+  try {
+    console.log(req.body)
+  } catch (e) {
+    throw e;
+  }
+  // const category = req.body.category;
+  //if (!tweet || !category || !tweet.text) return res.sendStatus(400);
   // if (category == "p") classifier.learn(tweet.text, 'positive');
   // else if (category == "n") classifier.learn(tweet.text, 'negative');
   // var stateJson = classifier.toJson();
@@ -167,6 +172,6 @@ app.post('/train', (req, res) => {
   // } catch (e) {
   //   res.sendStatus(400);
   // }
-  // res.sendStatus(200);
+  res.sendStatus(200);
 })
 
