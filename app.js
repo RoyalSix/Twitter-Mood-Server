@@ -120,7 +120,7 @@ app.get('/tweet', (req, res) => {
 app.get('/categorize', (req, res) => {
   if (!req.query.tweet) return res.sendStatus(400);
   const tweet = req.query.tweet;
-  res.json(categorize(tweet));
+  res.json(categorize(JSON.parse(tweet).text));
 })
 
 app.post('/train', (req, res) => {
