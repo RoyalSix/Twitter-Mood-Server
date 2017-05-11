@@ -14,6 +14,16 @@ app.use(function (req, res, next) {
 });
 
 var db = require('./db')
+db.connect(function (err) {
+  if (err) {
+    console.log('Unable to connect to MySQL.')
+    process.exit(1)
+  } else {
+    app.listen(8080, function () {
+      console.log('Listening on port 8080...')
+    })
+  }
+})
 
 
 var nconf = require('nconf');
@@ -28,14 +38,20 @@ var request = require('request');
 const calculateHappiness = (dataArray) => {
   var totalPos = 0;
   var totalNeg = 0;
-  for (var tweet of dataArray.n) {
-    totalNeg += parseInt(tweet.followers);
+  var totalPosRecorded = 0;
+  var totalNegRecorded = 0;
+  for (var tweet of dataArray) {
+    if (tweet.classifier == "negative") {
+      totalNegRecorded++;
+      totalNeg += parseInt(tweet.amount);
+    }
+    else if (tweet.classifier == "positive"){
+      totalPosRecorded++;
+       totalPos += parseInt(tweet.amount);
+    }
   }
-  for (var tweet of dataArray.p) {
-    totalPos += parseInt(tweet.followers);
-  }
-  const happyAvg = totalPos / dataArray.p.length;
-  const negAvg = totalNeg / dataArray.n.length;
+  const happyAvg = totalPos / totalPosRecorded;
+  const negAvg = totalNeg / totalNegRecorded;
   const betterAmount = happyAvg > negAvg ? "happy" : "not happy";
   const worstAmount = happyAvg < negAvg ? "happy" : "not happy";
   console.log("Got the following from trained data: \n");
@@ -46,17 +62,19 @@ const calculateHappiness = (dataArray) => {
   console.log("\n");
 }
 
-try {
-  var bayesData = fs.readJsonSync('./bayesData.json');
-  this.followersData = fs.readJsonSync('./followersData.json');
-} catch (e) {
-}
-if (bayesData) {
-  classifier = bayes.fromJson(bayesData);
-}
-if (this.followersData) {
+var bayesData = null;
+db.getBayesFromDB((bayesData) => {
+  if (bayesData) {
+    classifier = bayes.fromJson(JSON.stringify(bayesData));
+  }
+})
+
+db.getFollowersData((followersData) => {
+  this.followersData = followersData
+  if (this.followersData && this.followersData.length > 0) {
   calculateHappiness(this.followersData);
 }
+})
 
 nconf.file({ file: 'config.json' }).env();
 
@@ -66,19 +84,6 @@ var twitter = new Twit({
   access_token: nconf.get('TWITTER_ACCESS_TOKEN'),
   access_token_secret: nconf.get('TWITTER_ACCESS_TOKEN_SECRET')
 });
-
-
-function prompt(question, callback) {
-  var stdin = process.stdin,
-    stdout = process.stdout;
-
-  stdin.resume();
-  stdout.write(question);
-
-  stdin.once('data', function (data) {
-    callback(data.toString().trim());
-  });
-}
 
 var testRegex = '(.*I had.*|.*(I am))|(.*( day).*)|(.*( feel).*)|(I.*now|.*I)';
 var tweetStream = twitter.stream('statuses/filter', { track: ['I'], language: 'en' });
@@ -93,7 +98,7 @@ tweetStream.on('tweet', (tweet) => {
     if (this.tweetsArray.length <= 10) {
       request(`http://www.purgomalum.com/service/json?text=${encodeURIComponent(tweet.text)}`, (error, response, body) => {
         var newText = JSON.parse(body).result;
-        tweet.safeText = decodeURIComponent(newText);
+        tweet.safeText = newText;
         this.tweetsArray.push(tweet);
       });
     }
@@ -105,17 +110,6 @@ function categorize(tweet) {
 }
 app.get('/', function (req, res) {
   res.sendFile('home.html', { root: __dirname });
-})
-
-db.connect(db.MODE_PRODUCTION, function (err) {
-  if (err) {
-    console.log('Unable to connect to MySQL.')
-    process.exit(1)
-  } else {
-    app.listen(8080, function () {
-      console.log('Listening on port 8080...')
-    })
-  }
 })
 
 app.get('/tweet', (req, res) => {
@@ -134,16 +128,15 @@ app.post('/train', (req, res) => {
   const category = req.body.category;
   var tweetObject = JSON.parse(tweetString);
   if (!tweetObject || !category || !tweetObject.text) return res.sendStatus(400);
-  if (category == "p") classifier.learn(tweetObject.text, 'positive');
-  else if (category == "n") classifier.learn(tweetObject.text, 'negative');
-  var stateJson = classifier.toJson();
-  this.followersData[category].push({ followers: tweetObject.user.followers_count, username: tweetObject.user.screen_name })
+  classifier.learn(tweetObject.text, category);
   try {
-    fs.writeJSONSync('./bayesData.json', stateJson)
-    fs.writeJSONSync('./followersData.json', this.followersData)
+    //db.insertFollower(tweetObject.user.followers_count, tweetObject.user.screen_name, classifier);
+    //db.updateCountsInstance(classifier.toJson());
+    db.updateVocabInstance(classifier.toJson());
   } catch (e) {
-    res.sendStatus(400);
+    console.log(e)
+    //res.sendStatus(400);
   }
   res.sendStatus(200);
+  res.end();
 })
-
