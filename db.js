@@ -19,8 +19,6 @@ exports.connect = function (mode, done) {
         password: 'donkey',
         database: 'bigstars'
     })
-    //database: mode === exports.MODE_PRODUCTION ? PRODUCTION_DB : TEST_DB
-
     state.mode = mode
     done()
 }
