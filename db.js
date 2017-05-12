@@ -15,47 +15,6 @@ exports.connect = function (done) {
     }
 }
 
-exports.storeBayesInDB = function (bayesObj, done) {
-    const vocab = bayesObj.vocabulary
-    var wordCountFreqPos = 0;
-    var wordCountFreqNeg = 0;
-    for (var vocabWord in vocab) {
-        if (bayesObj["wordFrequencyCount"]["positive"][vocabWord]) {
-            wordCountFreqPos = bayesObj["wordFrequencyCount"]["positive"][vocabWord];
-        }
-        if (bayesObj["wordFrequencyCount"]["negative"][vocabWord]) {
-            wordCountFreqNeg = bayesObj["wordFrequencyCount"]["negative"][vocabWord];
-        }
-        this.connection.query(`INSERT INTO vocab (vocab_key, freqCountPos, freqCountNeg) VALUES ('${vocabWord}', ${wordCountFreqPos} , ${wordCountFreqNeg});`, function (err, rows, fields) {
-            if (!err)
-                console.log('The solution is: ', rows);
-            else
-                console.log('Error while performing Query.');
-        });
-    }
-}
-
-exports.storeFollowersInDB = function (followersObj, done) {
-    for (var classifier in followersObj) {
-        var currentClass = followersObj[classifier];
-        for (var follower of currentClass) {
-            if (classifier == "n") {
-                follower.classifier = "negative";
-            }
-            else if (classifier == "p") {
-                follower.classifier = "positive";
-            }
-            else continue;
-            this.connection.query(`INSERT INTO followers (amount, username, classifier) VALUES (${follower.followers}, '${follower.username}' , '${follower.classifier}');`, function (err, rows, fields) {
-                if (!err)
-                    console.log('The solution is: ', rows);
-                else
-                    console.log('Error while performing Query.');
-            });
-        }
-    }
-}
-
 exports.getBayesFromDB = function (done) {
     var bayesObj = {
         categories: {},

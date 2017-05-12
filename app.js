@@ -1,7 +1,25 @@
 require('babel-register');
 var express = require('express');
-const app = express();
 var bodyParser = require('body-parser')
+var nconf = require('nconf');
+var Twit = require('twit');
+var _ = require('lodash');
+var bayes = require('bayes');
+var classifier = bayes();
+var fs = require('fs-extra');
+var request = require('request');
+var db = require('./db')
+const app = express();
+this.followersData = [];
+
+nconf.file({ file: 'config.json' }).env();
+
+var twitter = new Twit({
+  consumer_key: nconf.get('TWITTER_CONSUMER_KEY'),
+  consumer_secret: nconf.get('TWITTER_CONSUMER_SECRET'),
+  access_token: nconf.get('TWITTER_ACCESS_TOKEN'),
+  access_token_secret: nconf.get('TWITTER_ACCESS_TOKEN_SECRET')
+});
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
 
@@ -13,7 +31,7 @@ app.use(function (req, res, next) {
   next();
 });
 
-var db = require('./db')
+
 db.connect(function (err) {
   if (err) {
     console.log('Unable to connect to MySQL.')
@@ -28,15 +46,29 @@ db.getFollowersData((followersData) => {
   this.followersData = followersData;
 });
 
+var testRegex = '(.*I had.*|.*(I am))|(.*( day).*)|(.*( feel).*)|(I.*now|.*I)';
+var tweetStream = twitter.stream('statuses/filter', { track: ['I'], language: 'en' });
+this.tweetsArray = [];
 
-var nconf = require('nconf');
-var Twit = require('twit');
-var _ = require('lodash');
-var bayes = require('bayes');
-var classifier = bayes();
-var fs = require('fs-extra');
-this.followersData = [];
-var request = require('request');
+
+tweetStream.on('tweet', (tweet) => {
+  const tweetText = tweet.extended_tweet ? tweet.extended_tweet.full_text : tweet.retweeted_status ? tweet.retweeted_status.text : tweet.text;
+  if (new RegExp(testRegex).test(tweetText)) {
+    tweet.text = tweetText.replace(/(http.+(\S|\b|\n))/g, '').trim();
+    if (this.tweetsArray.length <= 10) {
+      request(`http://www.purgomalum.com/service/json?text=${encodeURIComponent(tweet.text)}`, (error, response, body) => {
+        try {
+          var newText = JSON.parse(body).result;
+          tweet.safeText = newText;
+        } catch (e) {
+          tweet.safeText = tweet.text;
+        }
+        this.tweetsArray.push(tweet);
+      });
+    }
+  }
+});
+
 
 function calculateHappiness(dataArray, done) {
   var totalPos = 0;
@@ -63,49 +95,16 @@ function calculateHappiness(dataArray, done) {
   done(statementObject);
 }
 
-var bayesData = null;
+function categorize(tweet) {
+  return classifier.categorize(tweet);
+}
+
 db.getBayesFromDB((bayesData) => {
   if (bayesData) {
     classifier = bayes.fromJson(JSON.stringify(bayesData));
   }
 })
 
-nconf.file({ file: 'config.json' }).env();
-
-var twitter = new Twit({
-  consumer_key: nconf.get('TWITTER_CONSUMER_KEY'),
-  consumer_secret: nconf.get('TWITTER_CONSUMER_SECRET'),
-  access_token: nconf.get('TWITTER_ACCESS_TOKEN'),
-  access_token_secret: nconf.get('TWITTER_ACCESS_TOKEN_SECRET')
-});
-
-var testRegex = '(.*I had.*|.*(I am))|(.*( day).*)|(.*( feel).*)|(I.*now|.*I)';
-var tweetStream = twitter.stream('statuses/filter', { track: ['I'], language: 'en' });
-this.tweetsArray = [];
-this.done = true;
-
-
-tweetStream.on('tweet', (tweet) => {
-  const tweetText = tweet.extended_tweet ? tweet.extended_tweet.full_text : tweet.retweeted_status ? tweet.retweeted_status.text : tweet.text;
-  if (new RegExp(testRegex).test(tweetText)) {
-    tweet.text = tweetText.replace(/(http.+(\S|\b|\n))/g, '').trim();
-    if (this.tweetsArray.length <= 10) {
-      request(`http://www.purgomalum.com/service/json?text=${encodeURIComponent(tweet.text)}`, (error, response, body) => {
-        try {
-          var newText = JSON.parse(body).result;
-          tweet.safeText = newText;
-        } catch (e) {
-          tweet.safeText = tweet.text;
-        }
-        this.tweetsArray.push(tweet);
-      });
-    }
-  }
-});
-
-function categorize(tweet) {
-  return classifier.categorize(tweet);
-}
 app.get('/', function (req, res) {
   res.sendFile('home.html', { root: __dirname });
 })
