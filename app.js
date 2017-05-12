@@ -35,7 +35,7 @@ var fs = require('fs-extra');
 this.followersData = [];
 var request = require('request');
 
-const calculateHappiness = (dataArray) => {
+const calculateHappiness = (dataArray, done) => {
   var totalPos = 0;
   var totalNeg = 0;
   var totalPosRecorded = 0;
@@ -45,9 +45,9 @@ const calculateHappiness = (dataArray) => {
       totalNegRecorded++;
       totalNeg += parseInt(tweet.amount);
     }
-    else if (tweet.classifier == "positive"){
+    else if (tweet.classifier == "positive") {
       totalPosRecorded++;
-       totalPos += parseInt(tweet.amount);
+      totalPos += parseInt(tweet.amount);
     }
   }
   const happyAvg = totalPos / totalPosRecorded;
@@ -58,8 +58,15 @@ const calculateHappiness = (dataArray) => {
   console.log("Average of followers of users who are happy: ", happyAvg);
   console.log("Average of followers of users who are not happy: ", negAvg);
   console.log("\n");
+  var twitterStatement = `Users who are ${betterAmount} have ${Math.round((Math.abs(happyAvg - negAvg) / Math.max(happyAvg, negAvg)) * 100)}% more followers than those are ${worstAmount}`;
   console.log(`Users who are ${betterAmount} have ${Math.round((Math.abs(happyAvg - negAvg) / Math.max(happyAvg, negAvg)) * 100)}% more followers than those are ${worstAmount}`);
   console.log("\n");
+  var statementObject = {
+    twitterStatement,
+    happyAvg,
+    negAvg
+  }
+  done(statementObject);
 }
 
 var bayesData = null;
@@ -72,8 +79,8 @@ db.getBayesFromDB((bayesData) => {
 db.getFollowersData((followersData) => {
   this.followersData = followersData
   if (this.followersData && this.followersData.length > 0) {
-  calculateHappiness(this.followersData);
-}
+    calculateHappiness(this.followersData);
+  }
 })
 
 nconf.file({ file: 'config.json' }).env();
@@ -140,3 +147,11 @@ app.post('/train', (req, res) => {
   res.sendStatus(200);
   res.end();
 })
+
+app.get('/twitterStatement', (req, res) => {
+  if (this.followersData && this.followersData.length > 0) {
+    this.calculateHappiness(this.followersData, (resObj) => {
+      res.json(resObj);
+    })
+  }
+});

@@ -69,6 +69,7 @@ exports.getBayesFromDB = function (done) {
     };
     this.connection.query(`SELECT * FROM vocab`, (err, vocabRows, fields) => {
         this.connection.query(`SELECT * FROM counts`, (err, countRows, fields) => {
+            if (!countRows) return;
             var totalDocuments = 0;
             for (var classifier of countRows) {
                 bayesObj.categories[classifier.classifierType] = true;
