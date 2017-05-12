@@ -79,7 +79,7 @@ db.getBayesFromDB((bayesData) => {
 db.getFollowersData((followersData) => {
   this.followersData = followersData
   if (this.followersData && this.followersData.length > 0) {
-    calculateHappiness(this.followersData);
+    calculateHappiness(this.followersData, ()=>{});
   }
 })
 
