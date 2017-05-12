@@ -24,6 +24,9 @@ db.connect(function (err) {
     })
   }
 })
+db.getFollowersData((followersData) => {
+  this.followersData = followersData;
+});
 
 
 var nconf = require('nconf');
@@ -35,7 +38,7 @@ var fs = require('fs-extra');
 this.followersData = [];
 var request = require('request');
 
-const calculateHappiness = (dataArray, done) => {
+function calculateHappiness(dataArray, done) {
   var totalPos = 0;
   var totalNeg = 0;
   var totalPosRecorded = 0;
@@ -50,20 +53,11 @@ const calculateHappiness = (dataArray, done) => {
       totalPos += parseInt(tweet.amount);
     }
   }
-  const happyAvg = totalPos / totalPosRecorded;
+  const posAvg = totalPos / totalPosRecorded;
   const negAvg = totalNeg / totalNegRecorded;
-  const betterAmount = happyAvg > negAvg ? "happy" : "not happy";
-  const worstAmount = happyAvg < negAvg ? "happy" : "not happy";
-  console.log("Got the following from trained data: \n");
-  console.log("Average of followers of users who are happy: ", happyAvg);
-  console.log("Average of followers of users who are not happy: ", negAvg);
-  console.log("\n");
-  var twitterStatement = `Users who are ${betterAmount} have ${Math.round((Math.abs(happyAvg - negAvg) / Math.max(happyAvg, negAvg)) * 100)}% more followers than those are ${worstAmount}`;
-  console.log(`Users who are ${betterAmount} have ${Math.round((Math.abs(happyAvg - negAvg) / Math.max(happyAvg, negAvg)) * 100)}% more followers than those are ${worstAmount}`);
-  console.log("\n");
+
   var statementObject = {
-    twitterStatement,
-    happyAvg,
+    posAvg,
     negAvg
   }
   done(statementObject);
@@ -73,13 +67,6 @@ var bayesData = null;
 db.getBayesFromDB((bayesData) => {
   if (bayesData) {
     classifier = bayes.fromJson(JSON.stringify(bayesData));
-  }
-})
-
-db.getFollowersData((followersData) => {
-  this.followersData = followersData
-  if (this.followersData && this.followersData.length > 0) {
-    calculateHappiness(this.followersData, ()=>{});
   }
 })
 
@@ -105,9 +92,9 @@ tweetStream.on('tweet', (tweet) => {
     if (this.tweetsArray.length <= 10) {
       request(`http://www.purgomalum.com/service/json?text=${encodeURIComponent(tweet.text)}`, (error, response, body) => {
         try {
-        var newText = JSON.parse(body).result;
-        tweet.safeText = newText;
-        } catch(e) {
+          var newText = JSON.parse(body).result;
+          tweet.safeText = newText;
+        } catch (e) {
           tweet.safeText = tweet.text;
         }
         this.tweetsArray.push(tweet);
@@ -144,6 +131,9 @@ app.post('/train', (req, res) => {
     db.insertFollower(tweetObject.user.followers_count, tweetObject.user.screen_name, category);
     db.updateCountsInstance(JSON.parse(classifier.toJson()));
     db.updateVocabInstance(JSON.parse(classifier.toJson()));
+    db.getFollowersData((followersData) => {
+      this.followersData = followersData;
+    });
     console.log("UPDATED DB");
   } catch (e) {
     console.log(e)
@@ -152,10 +142,8 @@ app.post('/train', (req, res) => {
   res.end();
 })
 
-app.get('/twitterStatement', (req, res) => {
-  if (this.followersData && this.followersData.length > 0) {
-    this.calculateHappiness(this.followersData, (resObj) => {
-      res.json(resObj);
-    })
-  }
+app.get('/analysis', (req, res) => {
+  calculateHappiness(this.followersData, (resObj) => {
+    res.json(resObj);
+  })
 });
