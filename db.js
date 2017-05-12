@@ -80,7 +80,7 @@ exports.getBayesFromDB = function (done) {
                     bayesObj.wordFrequencyCount[classifier.classifierType][vocabWord.vocab_key] = vocabWord[classifier.classifierType];
                 }
             }
-            bayesObj.totalDocuments = totalDocuments;
+            bayesObj.totalDocuments = totalDocuments || 1;
             var vocabularySize = 0;
             for (var vocabWord of vocabRows) {
                 vocabularySize += 1;
@@ -105,7 +105,6 @@ exports.insertFollower = function (amount, username, classifier) {
 }
 
 exports.updateCountsInstance = function (bayesObj) {
-    console.log(bayesObj.categories);
     for (var category in bayesObj.categories) {
         var docCount = bayesObj.docCount[category];
         var wordCount = bayesObj.wordCount[category];
@@ -116,7 +115,6 @@ exports.updateCountsInstance = function (bayesObj) {
 }
 
 exports.updateVocabInstance = function (bayesObj) {
-    console.log(bayesObj);
     var freqObj = bayesObj["wordFrequencyCount"];
     for (var classifier in freqObj) {
         var classifierObj = freqObj[classifier];
