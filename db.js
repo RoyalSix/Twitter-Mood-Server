@@ -80,7 +80,7 @@ exports.getBayesFromDB = function (done) {
                     bayesObj.wordFrequencyCount[classifier.classifierType][vocabWord.vocab_key] = vocabWord[classifier.classifierType];
                 }
             }
-            bayesObj.totalDocuments = totalDocuments || 1;
+            bayesObj.totalDocuments = totalDocuments;
             var vocabularySize = 0;
             for (var vocabWord of vocabRows) {
                 vocabularySize += 1;
