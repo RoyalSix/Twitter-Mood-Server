@@ -20,7 +20,7 @@ db.connect(function (err) {
     process.exit(1)
   } else {
     app.listen(8080, function () {
-      console.log('Listening on port 8080...')
+      console.log('Listening on localhost port 8080...')
     })
   }
 })
