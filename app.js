@@ -130,12 +130,12 @@ app.post('/train', (req, res) => {
   if (!tweetObject || !category || !tweetObject.text) return res.sendStatus(400);
   classifier.learn(tweetObject.text, category);
   try {
-    //db.insertFollower(tweetObject.user.followers_count, tweetObject.user.screen_name, classifier);
-    //db.updateCountsInstance(classifier.toJson());
-    db.updateVocabInstance(classifier.toJson());
+    db.insertFollower(tweetObject.user.followers_count, tweetObject.user.screen_name, category);
+    db.updateCountsInstance(JSON.parse(classifier.toJson()));
+    db.updateVocabInstance(JSON.parse(classifier.toJson()));
+    console.log("UPDATED DB");
   } catch (e) {
     console.log(e)
-    //res.sendStatus(400);
   }
   res.sendStatus(200);
   res.end();

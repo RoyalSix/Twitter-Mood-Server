@@ -100,35 +100,29 @@ exports.getFollowersData = function (done) {
 
 exports.insertFollower = function (amount, username, classifier) {
     this.connection.query(`INSERT INTO followers (amount, username, classifier) VALUES (${amount}, '${username}' , '${classifier}');`, function (err, rows, fields) {
-        if (err)
-            console.log('Error while performing Query.');
+        if (err) console.log('Error while performing Query.');
     });
 }
 
 exports.updateCountsInstance = function (bayesObj) {
-    for (var category of bayesObj.categories) {
+    console.log(bayesObj.categories);
+    for (var category in bayesObj.categories) {
         var docCount = bayesObj.docCount[category];
         var wordCount = bayesObj.wordCount[category];
-        this.connection.query(`UPDATE counts SET docCount = ${docCount} WHERE classifierType = '${category}';`, function (err, rows, fields) {
-            if (err)
-                console.log('Error while performing Query.');
-        });
-        this.connection.query(`UPDATE counts SET wordCount = ${wordCount} WHERE classifierType = '${category}';`, function (err, rows, fields) {
-            if (err)
-                console.log('Error while performing Query.');
+        this.connection.query(`INSERT INTO counts (wordCount, docCount, classifierType) VALUES (${wordCount}, ${docCount}, '${category}') ON DUPLICATE KEY UPDATE docCount=${docCount}, wordCount=${wordCount};`, function (err, rows, fields) {
+            if (err) console.log('Error while performing Query.');
         });
     }
 }
 
 exports.updateVocabInstance = function (bayesObj) {
-    bayesObj = JSON.parse(bayesObj);
+    console.log(bayesObj);
     var freqObj = bayesObj["wordFrequencyCount"];
     for (var classifier in freqObj) {
         var classifierObj = freqObj[classifier];
         for (var word in classifierObj) {
-            this.connection.query(`INSERT INTO vocab (vocab_key, ${classifier}) VALUES ('${word}', ${classifierObj[word]}) ON DUPLICATE KEY UPDATE vocab_key='${word}'`, function (err, rows, fields) {
-                if (err)
-                    console.log('Error while performing Query.');
+            this.connection.query(`INSERT INTO vocab (vocab_key, ${classifier}) VALUES ('${word}', ${classifierObj[word]}) ON DUPLICATE KEY UPDATE ${classifier}=${classifierObj[word]}`, function (err, rows, fields) {
+                if (err) console.log('Error while performing Query.');
             });
         }
     }
