@@ -104,8 +104,12 @@ tweetStream.on('tweet', (tweet) => {
     tweet.text = tweetText.replace(/(http.+(\S|\b|\n))/g, '').trim();
     if (this.tweetsArray.length <= 10) {
       request(`http://www.purgomalum.com/service/json?text=${encodeURIComponent(tweet.text)}`, (error, response, body) => {
+        try {
         var newText = JSON.parse(body).result;
         tweet.safeText = newText;
+        } catch(e) {
+          tweet.safeText = tweet.text;
+        }
         this.tweetsArray.push(tweet);
       });
     }
