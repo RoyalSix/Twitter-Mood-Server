@@ -1,19 +1,15 @@
-var mysql = require('mysql');
+var promise = require('bluebird');
 
-exports.connect = function (done) {
-    try {
-        this.connection = mysql.createConnection({
-            host: '35.188.96.16',
-            user: 'jay',
-            password: 'donkey',
-            database: 'bayes'
-        });
-        this.connection.connect();
-        done();
-    } catch (e) {
-        done(e)
-    }
-}
+var options = {
+    // Initialization Options
+    promiseLib: promise
+};
+
+var pgp = require('pg-promise')(options);
+var connectionString = process.env.DATABASE_URL;
+var db = pgp(connectionString);
+
+// add query functions
 
 exports.getBayesFromDB = function (done) {
     var bayesObj = {
@@ -26,41 +22,41 @@ exports.getBayesFromDB = function (done) {
         wordFrequencyCount: {},
         options: {}
     };
-    this.connection.query(`SELECT * FROM vocab`, (err, vocabRows, fields) => {
-        this.connection.query(`SELECT * FROM counts`, (err, countRows, fields) => {
-            if (!countRows) return;
-            var totalDocuments = 0;
-            for (var classifier of countRows) {
-                bayesObj.categories[classifier.classifierType] = true;
-                bayesObj.docCount[classifier.classifierType] = classifier.docCount;
-                bayesObj.wordCount[classifier.classifierType] = classifier.wordCount;
-                bayesObj.wordFrequencyCount[classifier.classifierType] = {};
-                totalDocuments += classifier.docCount;
-                for (var vocabWord of vocabRows) {
-                    bayesObj.wordFrequencyCount[classifier.classifierType][vocabWord.vocab_key] = vocabWord[classifier.classifierType];
-                }
-            }
-            bayesObj.totalDocuments = totalDocuments;
-            var vocabularySize = 0;
-            for (var vocabWord of vocabRows) {
-                vocabularySize += 1;
-                bayesObj.vocabulary[vocabWord.vocab_key] = true;
-            }
-            bayesObj.vocabularySize = vocabularySize;
-            done(bayesObj)
-        });
-    });
+    db.any('select * from vocab')
+        .then(function (vocabRows) {
+            db.any('select * from counts')
+                .then(function (countRows) {
+                    if (!countRows) return;
+                    var totalDocuments = 0;
+                    for (var classifier of countRows) {
+                        bayesObj.categories[classifier.classifierType] = true;
+                        bayesObj.docCount[classifier.classifierType] = classifier.docCount;
+                        bayesObj.wordCount[classifier.classifierType] = classifier.wordCount;
+                        bayesObj.wordFrequencyCount[classifier.classifierType] = {};
+                        totalDocuments += classifier.docCount;
+                        for (var vocabWord of vocabRows) {
+                            bayesObj.wordFrequencyCount[classifier.classifierType][vocabWord.vocab_key] = vocabWord[classifier.classifierType];
+                        }
+                    }
+                    bayesObj.totalDocuments = totalDocuments;
+                    var vocabularySize = 0;
+                    for (var vocabWord of vocabRows) {
+                        vocabularySize += 1;
+                        bayesObj.vocabulary[vocabWord.vocab_key] = true;
+                    }
+                    bayesObj.vocabularySize = vocabularySize;
+                    done(bayesObj)
+                })
+        })
 }
 
 exports.getFollowersData = function (done) {
-    this.connection.query(`SELECT * FROM followers`, (err, rows, fields) => {
-        done(rows)
-    });
+    db.any('select * from followers').then(done);
 }
 
 exports.insertFollower = function (amount, username, classifier) {
-    this.connection.query(`INSERT INTO followers (amount, username, classifier) VALUES (${amount}, '${username}' , '${classifier}');`, function (err, rows, fields) {
-        if (err) console.log('Error while performing Query.');
+    db.none(`INSERT INTO followers (amount, username, classifier) VALUES (${amount}, '${username}' , '${classifier}');`).catch(function (err) {
+      console.log('Error while performing Query.');
     });
 }
 
@@ -68,7 +64,7 @@ exports.updateCountsInstance = function (bayesObj) {
     for (var category in bayesObj.categories) {
         var docCount = bayesObj.docCount[category];
         var wordCount = bayesObj.wordCount[category];
-        this.connection.query(`INSERT INTO counts (wordCount, docCount, classifierType) VALUES (${wordCount}, ${docCount}, '${category}') ON DUPLICATE KEY UPDATE docCount=${docCount}, wordCount=${wordCount};`, function (err, rows, fields) {
+        db.none(`INSERT INTO counts (wordCount, docCount, classifierType) VALUES (${wordCount}, ${docCount}, '${category}') ON CONFLICT (classifierType) DO UPDATE SET docCount=${docCount}, wordCount=${wordCount};`).catch(function (err) {
             if (err) console.log('Error while performing Query.');
         });
     }
@@ -79,7 +75,7 @@ exports.updateVocabInstance = function (bayesObj) {
     for (var classifier in freqObj) {
         var classifierObj = freqObj[classifier];
         for (var word in classifierObj) {
-            this.connection.query(`INSERT INTO vocab (vocab_key, ${classifier}) VALUES ('${word}', ${classifierObj[word]}) ON DUPLICATE KEY UPDATE ${classifier}=${classifierObj[word]}`, function (err, rows, fields) {
+            this.connection.query(`INSERT INTO vocab (vocab_key, ${classifier}) VALUES ('${word}', ${classifierObj[word]}) ON CONFLICT (vocab_key) DO UPDATE SET ${classifier}=${classifierObj[word]}`).catch(function (err) {
                 if (err) console.log('Error while performing Query.');
             });
         }

@@ -31,18 +31,6 @@ app.use(function (req, res, next) {
   next();
 });
 
-
-db.connect(function (err) {
-  if (err) {
-    console.log('Unable to connect to MySQL.')
-    process.exit(1)
-  } else {
-    app.listen(8080, function () {
-      console.log('Listening on localhost port 8080...')
-    })
-  }
-})
-
 db.getFollowersData((followersData) => {
   this.followersData = followersData;
 });
