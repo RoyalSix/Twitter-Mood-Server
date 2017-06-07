@@ -1,0 +1,101 @@
+-- MySQL dump 10.13  Distrib 5.7.18, for osx10.12 (x86_64)
+--
+-- Host: 35.188.96.16    Database: bayes
+-- ------------------------------------------------------
+-- Server version	5.7.14-google
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO,POSTGRESQL' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Current Database: "bayes"
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ "bayes" /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE "bayes";
+
+--
+-- Table structure for table "counts"
+--
+
+DROP TABLE IF EXISTS "counts";
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE "counts" (
+  "docCount" int(11) DEFAULT NULL,
+  "wordCount" int(11) DEFAULT NULL,
+  "classifierType" varchar(100) NOT NULL,
+  PRIMARY KEY ("classifierType")
+);
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table "counts"
+--
+
+LOCK TABLES "counts" WRITE;
+/*!40000 ALTER TABLE "counts" DISABLE KEYS */;
+INSERT INTO "counts" VALUES (24,400,'negative'),(27,366,'positive');
+/*!40000 ALTER TABLE "counts" ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table "followers"
+--
+
+DROP TABLE IF EXISTS "followers";
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE "followers" (
+  "amount" int(11) DEFAULT NULL,
+  "username" varchar(255) DEFAULT NULL,
+  "classifier" varchar(100) DEFAULT NULL
+);
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table "followers"
+--
+
+LOCK TABLES "followers" WRITE;
+/*!40000 ALTER TABLE "followers" DISABLE KEYS */;
+INSERT INTO "followers" VALUES (405,'sm00th__','negative'),(581,'AlexisErik23','positive'),(2428,'FrankiiJVelez','negative'),(213,'quinnharIey','positive'),(2794,'JohnnyFieryXXX','positive'),(775,'mckennataylor13','positive'),(248,'xo_Griffindor','negative'),(3410,'truckinwithnorm','negative'),(13677,'strangerkcc','positive'),(590,'__Auty','negative'),(307,'somsxmiii','positive'),(3488,'bellametaphor','positive'),(586,'hadleightm','negative'),(37,'kosscromdog','negative'),(78,'ayliiiinnnn','negative'),(114,'Happyhero4409','negative'),(734,'amieelondono','negative'),(525,'sobarbs','positive'),(351,'tamsen_17','negative'),(6981,'Kueennixie','positive'),(11271,'HeyItsChris412','positive'),(1807,'InfernoHashtags','positive'),(31,'BigCAN88','positive'),(3142,'okokjosephine_','positive'),(1691,'rufaimb','positive'),(975,'_naaijahvaughn','positive'),(2528,'amourlashay_','positive'),(42,'Mo76539174','negative'),(24001,'snehalataj','positive'),(1109,'pxstxr','positive'),(836,'HallieKnight98','negative'),(2,'Eeeyyyysssss','negative'),(42778,'nickiminaj1stan','positive'),(93,'Criseldaa6712','negative'),(2725,'RNKNVISUALS','negative'),(721,'Sortitoutmate','negative'),(809,'GeneralistGamer','negative'),(92,'mtmilja','positive'),(973,'kaitie_rhodes','negative'),(631,'Hrd_a_rumr','positive'),(13877,'DonalLiveLife','positive'),(247,'WiggleWriter','positive'),(42,'beatmeoff420','negative'),(9,'real_gudockuser','positive'),(151,'fm_arya','positive'),(5063,'GlowOutlets','negative'),(247,'Imawavyniqqa','positive'),(89,'Vinh_Da0','negative'),(158,'LoukyJac','negative'),(412,'wantriidictado','negative'),(8,'YassiTannerBaby','positive');
+/*!40000 ALTER TABLE "followers" ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table "vocab"
+--
+
+DROP TABLE IF EXISTS "vocab";
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE "vocab" (
+  "vocab_key" varchar(100) NOT NULL,
+  "negative" int(100) NOT NULL DEFAULT '0',
+  "positive" int(100) NOT NULL DEFAULT '0',
+  PRIMARY KEY ("vocab_key")
+);
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table "vocab"
+--
+
+LOCK TABLES "vocab" WRITE;
+/*!40000 ALTER TABLE "vocab" DISABLE KEYS */;
+INSERT INTO "vocab" VALUES ('',18,19),(')',0,1),('0',1,0),('10',1,0),('1UpTopAhk',0,1),('2',1,1),('20',0,1),('250',0,1),('3',0,1),('3AM',1,0),('4',0,1),('49',1,0),('5',1,0),('a',7,7),('About',1,0),('absolutely',1,0),('accidentally',1,0),('account',1,0),('actually',2,0),('admit',0,1),('ago',1,0),('all',0,1),('always',0,1),('am',1,2),('amp',2,0),('an',1,0),('and',5,1),('AnnaLee89',0,1),('another',1,0),('anybody',0,1),('ARE',1,0),('argue',1,0),('around',1,0),('as',1,0),('at',3,0),('awake',0,1),('baby',0,1),('babyyy',0,1),('bad',1,0),('BB',0,1),('because',2,0),('bed',1,0),('been',0,1),('before',2,0),('being',1,1),('believe',1,1),('best',0,1),('between',1,0),('Bionca',0,1),('birthday',0,1),('bitch',1,0),('blessing',0,1),('blocked',1,0),('Body',1,0),('both',0,1),('boys',0,1),('break',1,0),('but',2,0),('came',1,0),('Camila_Cabello',0,1),('can',2,3),('cannot',1,0),('career',0,1),('chance',1,0),('Chenloudday',0,1),('child',0,1),('chill',0,1),('choices',0,1),('chores',0,2),('Christ',1,0),('clout',1,0),('college',0,1),('colors',0,1),('Coming',1,1),('concert',1,0),('confidence',0,1),('cool',1,0),('couple',1,0),('CristinaKoa',0,1),('crush',0,1),('cry',0,1),('currently',0,1),('customer',1,0),('day',0,2),('DC',1,0),('deal',1,0),('DECENT',1,0),('Delete',1,0),('demanding',1,0),('desk',1,0),('determined',0,1),('DID',1,0),('didn',1,1),('died',1,0),('do',0,2),('doing',0,2),('don',1,1),('DonalLiveLife',0,1),('Donal_Walsh_',0,1),('dont',1,0),('dropping',0,1),('drum',1,0),('else',1,1),('emotional',1,0),('enough',1,0),('Especially',0,1),('europe',0,1),('even',1,0),('ever',2,1),('everybody',1,0),('Everything',2,0),('experiment',0,1),('face',1,0),('fan',0,1),('feel',1,1),('feelings',0,1),('Feelnobody',1,0),('few',1,2),('fight',0,1),('fly',1,0),('follow',0,1),('Football',0,1),('for',2,6),('Forgotten',1,0),('found',1,0),('from',1,0),('fucked',1,0),('fuckin',2,0),('fw',0,2),('games',1,0),('garden',0,2),('gayest',1,0),('get',1,1),('getting',1,0),('Give',1,0),('going',1,0),('GONNA',1,0),('good',1,0),('GoRead',0,1),('got',1,0),('GreysAnatomy',1,0),('guess',1,0),('guy',0,1),('had',4,2),('Hahaha',1,0),('happy',0,1),('HappyBirt',0,1),('harder',0,1),('has',0,1),('hate',2,0),('have',0,3),('He',1,1),('Heeley',0,1),('her',0,1),('here',1,2),('hinabiwi',1,0),('hit',0,1),('hope',0,1),('hours',1,0),('house',1,0),('how',2,0),('human',0,1),('hundreds',0,1),('hyundaiindia',0,1),('I',12,19),('idea',1,0),('if',1,1),('im',1,0),('iMessage',1,0),('important',0,1),('in',4,5),('inspire',0,1),('introvert',1,0),('is',4,2),('it',2,1),('its',0,1),('JakeLenie',1,0),('Jesus',0,2),('just',3,2),('JustChazlynn',1,0),('Justin_bx170',1,0),('keep',0,1),('KIDDING',1,0),('Kira',0,1),('knew',1,0),('know',1,2),('known',1,0),('L',1,0),('laugh',0,1),('learn',0,1),('learning',0,1),('lemme',1,0),('lies',1,0),('lifetime',0,1),('like',0,1),('listen',0,1),('literally',1,1),('Little',1,0),('ll',2,0),('Lmao',0,1),('Loads',0,1),('lol',1,0),('longer',0,1),('Lord',0,1),('LOV',0,1),('love',0,2),('LOVED',0,1),('low',0,1),('lt',0,1),('m',2,5),('make',2,0),('makes',0,1),('making',2,0),('many',1,0),('mastering',1,0),('mata_tanner',0,1),('may',1,0),('me',1,1),('mean',1,0),('meet',0,2),('Mila',0,1),('million',0,1),('minutes',0,1),('miss',0,1),('month',1,0),('more',1,1),('morning',1,0),('much',1,1),('music',1,0),('must',0,1),('my',1,5),('myself',0,3),('nap',1,0),('never',1,0),('news',0,1),('NIGHT',1,0),('No',1,0),('non',0,1),('not',0,2),('now',1,0),('Of',1,1),('old',0,1),('OMFG',1,0),('on',2,2),('Once',0,1),('one',2,2),('only',1,0),('or',0,2),('our',0,1),('out',4,0),('Over',1,1),('pain',1,0),('patterns',1,0),('person',1,1),('PHONE',1,0),('photos',0,1),('pick',1,0),('please',0,1),('poison',1,0),('POTUS',1,0),('Ppl',0,1),('preference',1,0),('promise',1,0),('pussy',1,0),('queen',0,1),('race',0,2),('racism',0,1),('reasonable',0,1),('Receive',1,0),('regret',1,0),('rendering',0,1),('respect',0,1),('retailproblems',1,0),('retweet',1,0),('revision',1,0),('rumors',1,0),('run',1,0),('s',3,3),('said',0,1),('satanic',1,0),('save',0,1),('say',0,1),('says',0,1),('schedule',1,0),('SCHOOL',1,0),('Second',1,0),('see',0,1),('seen',1,0),('self',0,1),('Sharon',0,1),('shit',3,0),('should',0,2),('show',1,0),('SJ',0,1),('slaying',0,1),('SLEEP',1,0),('slept',1,0),('smile',0,1),('so',2,4),('Some',0,1),('Someone',1,0),('something',1,0),('song',0,1),('sorry',1,0),('spare',0,1),('special',1,0),('stand',1,0),('started',2,0),('still',0,1),('stop',0,1),('support',0,1),('SwallaREMIX',0,1),('swear',0,1),('t',3,3),('take',0,1),('tell',1,0),('than',1,2),('Thanks',0,1),('that',0,3),('the',7,5),('them',1,1),('ThenTheCopsShowedUp',0,2),('there',1,0),('TheReal_mataty',0,1),('they',0,1),('this',3,1),('tho',1,0),('thought',1,0),('time',0,2),('timeline',0,1),('to',1,13),('today',1,0),('Too',1,0),('took',0,1),('toonboom',0,1),('tough',0,1),('ToughLove',0,1),('treated',1,0),('Trucking',1,0),('tryna',1,0),('tsunamisel',1,0),('typa',1,0),('U',0,1),('understand',1,0),('up',3,0),('us',1,0),('use',0,1),('USED',1,0),('Usually',0,1),('vante',1,0),('ve',2,0),('very',0,1),('wanna',0,1),('want',1,2),('wanted',0,1),('was',5,2),('we',1,1),('week',1,0),('WELL',1,0),('what',1,1),('WHEN',1,0),('while',1,0),('who',1,0),('why',0,1),('Wish',1,0),('with',1,0),('without',0,1),('WorIdStarLaugh',1,0),('work',1,0),('wrong',2,0),('x632',0,1),('Yayyy',0,1),('Yeah',0,1),('years',1,2),('yesterday',1,0),('you',2,6),('your',2,1),('youre',1,0),('yours',0,1),('_AROUND_12',0,1);
+/*!40000 ALTER TABLE "vocab" ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2017-06-07  0:16:57

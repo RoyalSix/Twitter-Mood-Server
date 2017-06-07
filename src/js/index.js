@@ -3,7 +3,7 @@ import logo from './applia_icon.png';
 import './App.css';
 
 const local = true;
-const IP = local ? "localhost" : "35.187.165.232";
+const IP = "35.187.165.232";
 
 class App extends Component {
   constructor(props) {
