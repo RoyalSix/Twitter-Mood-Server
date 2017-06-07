@@ -23,6 +23,11 @@ var twitter = new Twit({
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
 
+var server = app.listen(process.env.PORT || 8080, function () {
+  var port = server.address().port;
+  console.log("App now running on port", port);
+});
+
 // parse application/json
 app.use(bodyParser.json());
 app.use(function (req, res, next) {
