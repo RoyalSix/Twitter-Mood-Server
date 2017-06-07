@@ -55,7 +55,7 @@ exports.getFollowersData = function (done) {
 }
 
 exports.insertFollower = function (amount, username, classifier) {
-    db.none(`INSERT INTO followers (amount, username, classifier) VALUES (${amount}, '${username}' , '${classifier}');`).catch(function (err) {
+    db.none(`INSERT INTO followers ("amount", "username", "classifier") VALUES (${amount}, '${username}' , '${classifier}');`).catch(function (err) {
       console.log('Error while performing Query.');
     });
 }
@@ -64,7 +64,7 @@ exports.updateCountsInstance = function (bayesObj) {
     for (var category in bayesObj.categories) {
         var docCount = bayesObj.docCount[category];
         var wordCount = bayesObj.wordCount[category];
-        db.none(`INSERT INTO counts (wordCount, docCount, classifierType) VALUES (${wordCount}, ${docCount}, '${category}') ON CONFLICT (classifierType) DO UPDATE SET docCount=${docCount}, wordCount=${wordCount};`).catch(function (err) {
+        db.none(`INSERT INTO counts ("wordCount", "docCount", "classifierType") VALUES (${wordCount}, ${docCount}, '${category}') ON CONFLICT ("classifierType") DO UPDATE SET "docCount"=${docCount}, "wordCount"=${wordCount};`).catch(function (err) {
             if (err) console.log('Error while performing Query.');
         });
     }
@@ -75,7 +75,7 @@ exports.updateVocabInstance = function (bayesObj) {
     for (var classifier in freqObj) {
         var classifierObj = freqObj[classifier];
         for (var word in classifierObj) {
-            this.connection.query(`INSERT INTO vocab (vocab_key, ${classifier}) VALUES ('${word}', ${classifierObj[word]}) ON CONFLICT (vocab_key) DO UPDATE SET ${classifier}=${classifierObj[word]}`).catch(function (err) {
+            this.connection.query(`INSERT INTO vocab ("vocab_key", ${classifier}) VALUES ('${word}', ${classifierObj[word]}) ON CONFLICT ("vocab_key") DO UPDATE SET ${classifier}=${classifierObj[word]}`).catch(function (err) {
                 if (err) console.log('Error while performing Query.');
             });
         }
