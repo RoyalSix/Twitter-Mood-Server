@@ -1,53 +1,24 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width">
+    <title></title>
+    <base target="_blank">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css" >
 
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap-theme.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" type="text/css" href="src/css/styles.css">
   </head>
-
   <body>
-
-    <div class="site-wrapper">
-
-      <div class="site-wrapper-inner">
-
-        <div class="cover-container">
-
-          <div class="masthead clearfix">
-            <div class="inner">
-              <h3 class="masthead-brand">Project Node Task App</h3>
-              <nav>
-                <ul class="nav masthead-nav">
-                  <li class="active"><a href="#">Home</a></li>
-                  <li><a href="/showSignInPage">SignIn</a></li>
-                  <li><a href="/showSignUpPage">SignUp</a></li>
-                </ul>
-              </nav>
-            </div>
-          </div>
-
-          <div class="inner cover">
-            <h1 class="cover-heading">Node Task App</h1>
-            <p class="lead">Task App Using Node.js & MySQL.</p>
-            <p class="lead">
-              <a href="/showSignUpPage" class="btn btn-lg btn-default">Sign Up</a>
-            </p>
-          </div>
-
-          <div class="mastfoot">
-            <div class="inner">
-              <p>Node Task App, by <a href="https://twitter.com/jay3dec">@jay3dec</a>.</p>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-    
+    <div id="package_manager"></div>
+    <div id="content"></div>
+    <script type="text/javascript">
+      require("./src/js/index");
+    </script>
   </body>
 </html>
