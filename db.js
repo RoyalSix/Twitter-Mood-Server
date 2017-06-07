@@ -75,7 +75,7 @@ exports.updateVocabInstance = function (bayesObj) {
     for (var classifier in freqObj) {
         var classifierObj = freqObj[classifier];
         for (var word in classifierObj) {
-            this.connection.query(`INSERT INTO vocab ("vocab_key", ${classifier}) VALUES ('${word}', ${classifierObj[word]}) ON CONFLICT ("vocab_key") DO UPDATE SET ${classifier}=${classifierObj[word]}`).catch(function (err) {
+            db.none(`INSERT INTO vocab ("vocab_key", ${classifier}) VALUES ('${word}', ${classifierObj[word]}) ON CONFLICT ("vocab_key") DO UPDATE SET ${classifier}=${classifierObj[word]}`).catch(function (err) {
                 if (err) console.log('Error while performing Query.');
             });
         }
