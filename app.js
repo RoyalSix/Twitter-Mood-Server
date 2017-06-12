@@ -90,6 +90,7 @@ function calculateHappiness(dataArray, done) {
 }
 
 function categorize(tweet) {
+  //tweet + length_${len of tweet}
   return classifier.categorize(tweet);
 }
 
@@ -111,6 +112,7 @@ app.get('/tweet', (req, res) => {
 app.get('/categorize', (req, res) => {
   if (!req.query.tweet) return res.sendStatus(400);
   const tweet = req.query.tweet;
+  //remove non - alpha characters
   res.json(categorize(JSON.parse(tweet).text));
 })
 
@@ -119,11 +121,17 @@ app.post('/train', (req, res) => {
   const category = req.body.category;
   var tweetObject = JSON.parse(tweetString);
   if (!tweetObject || !category || !tweetObject.text) return res.sendStatus(400);
-  classifier.learn(tweetObject.text, category);
   try {
+    var amountOfChunks = tweet.length / 3;
+    var tweetText = tweetObject.text;
+    var tweetArray = tweetText.split(" ");
+    for (var i = 1; i < amountOfChunks + 1; i++) {
+      var currentPremutation = tweetArray.splice(i * 3, 3);
+      classifier.learn(currentPremutation, category);
+      db.updateCountsInstance(JSON.parse(classifier.toJson()));
+      db.updateVocabInstance(JSON.parse(classifier.toJson()));
+    }
     db.insertFollower(tweetObject.user.followers_count, tweetObject.user.screen_name, category);
-    db.updateCountsInstance(JSON.parse(classifier.toJson()));
-    db.updateVocabInstance(JSON.parse(classifier.toJson()));
     db.getFollowersData((followersData) => {
       this.followersData = followersData;
     });
